@@ -22,7 +22,6 @@ def greater_than(condition_name,condition_tit):
                 for row in data_dict:  # 遍历数组的每一行
                     row_list.append(data_dict[row][data_index])  # 获取每一行的值
                 choice_list.append(row_list)
-        print(choice_list)
         return choice_list
     else:
         print('你输入的参数有问题')
@@ -93,25 +92,40 @@ def condition_screening(condition_val):#根据where后的值来进行条件查�
             return comparison_dict[comparison](condition_name,condition_tit)
         else:
             print('')
+def save():
+    with open("%s.new"%db_file,'w',encoding='utf-8') as f:
+
+        for staff_index, staff_id in enumerate(culumes_dict['id']):
+            list_date = []
+            for i in culumes_dict:
+                list_date.append(culumes_dict[i][staff_index])
+            f.write(','.join(list_date)+'\n')
 def add_message():
     pass
 def delet_message():
     pass
-def modify_message():
-    pass
-
-
-def query_message(cmd_left, query_date): # cmd_left = 'select age,name from db '
-    print(cmd_left, query_date)
+def modify_message(cmd_left, query_date):  # update db set name=jkkk where age > 24
+    update_name,update_val = cmd_left.split('set')[1].strip().split('=')
+    culum_index = culum_list.index(update_name) #获取需要更新的字段的索引
+    for staff_id in query_date:
+        staff_id = staff_id[0]
+        staff_index = culumes_dict['id'].index(staff_id)
+        culumes_dict[update_name][staff_index] = update_val
     print(culumes_dict)
-    select_date= [i.strip() for i in cmd_left.strip().split("from")]
+    save()
+
+
+def query_message(cmd_left, query_date):
+    """cmd_left = 'select age,name from db ',query_date[['2', 'Jim', '25', '13651058808', 'IT', '2011-09-01'], ['3', 'Tom', '29', '13761054698', 'IT', '2010-03-01']"""
+    select_date= [i.strip() for i in cmd_left.split("from")]
     select_date = select_date[0].split(" ")[1].split(',')  # “select age,name”.split()筛选出所要选择的元素
     date_chioces = []
-    for i in query_date:
+    """从query_date中选择name,age的list[['25', 'Jim'], ['29', 'Tom'], ['40', 'Suzen'], ['32', 'Mark']]"""
+    for query_line in query_date:  #遍历外层列表
         date_chioce = []
-        for select_date_row in select_date:
+        for select_date_row in select_date:  #遍历内层的列表的序列号
             date_index = culum_list.index(select_date_row)
-            date_chioce.append(i[date_index])
+            date_chioce.append(query_line[date_index])
         date_chioces.append(date_chioce)
     print(date_chioces)
 def main():
@@ -135,21 +149,19 @@ def main():
     }
     while True:
         cmd = input("请输入》》").strip('\n')
-
-        #operation_list = ['add', 'delet', 'update', 'select']
         if not cmd: continue
         else:
             if cmd.split(' ')[0] in route_operation:
                 query_left, query_right = cmd.split('where')
                 query_data = condition_screening(query_right)
                 b = cmd.split(' ')
-                print(b[0])
-                route_operation[b[0]](query_left, query_data)
+                route_operation[b[0]](query_left.strip(), query_data)
 
             else:
                 print('你输入的数据有问题')
 if __name__ == '__main__':
     global culum_list, culumes_dict
+    db_file = 'new_yuangong'
     culum_list = ['id', 'name', 'age', 'phone', 'dept', 'enroll_date']
     culumes_dict = read_text()
     main()

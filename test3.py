@@ -8,4 +8,4 @@ else:
     new = 3
 if new == 3:
     print('yes')
-select age,name from db where age > 24
+update db set name=1 where age > 24
