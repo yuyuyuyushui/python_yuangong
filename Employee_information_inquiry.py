@@ -7,10 +7,11 @@ def read_text():
     for i in culum_list:
         dict_message[i] = []
     with open('员工信息表', 'r', encoding='utf-8') as f:
-        for line in f:
-            for index, line_val in enumerate(line.strip('\n').split(',')):
-                dict_message[culum_list[index]].append(line_val)
+        for line_message in f:
+            for index, line_val in enumerate(line_message.strip('\n').split(',')):
+                dict_message[culum_list[index]].append(line_val)  #同时循环字典的键和字典的值列表
     return dict_message
+
 
 def greater_than(condition_name,condition_tit):
     data_dict = read_text()
@@ -27,7 +28,7 @@ def greater_than(condition_name,condition_tit):
         print('你输入的参数有问题')
 
 
-def less_than(condition_name,condition_tit):
+def less_than(condition_name, condition_tit):
     data_dict = read_text()
     if condition_name in data_dict:
         choice_list = []
@@ -94,13 +95,12 @@ def condition_screening(condition_val):#根据where后的值来进行条件查�
             print('')
 def save():
     with open("%s.new"%db_file,'w',encoding='utf-8') as f:
-
         for staff_index, staff_id in enumerate(culumes_dict['id']):
             list_date = []
             for i in culumes_dict:
                 list_date.append(culumes_dict[i][staff_index])
             f.write(','.join(list_date)+'\n')
-def add_message():
+def add_message(cmd_left):
     pass
 def delet_message():
     pass
@@ -119,15 +119,21 @@ def query_message(cmd_left, query_date):
     """cmd_left = 'select age,name from db ',query_date[['2', 'Jim', '25', '13651058808', 'IT', '2011-09-01'], ['3', 'Tom', '29', '13761054698', 'IT', '2010-03-01']"""
     select_date= [i.strip() for i in cmd_left.split("from")]
     select_date = select_date[0].split(" ")[1].split(',')  # “select age,name”.split()筛选出所要选择的元素
-    date_chioces = []
-    """从query_date中选择name,age的list[['25', 'Jim'], ['29', 'Tom'], ['40', 'Suzen'], ['32', 'Mark']]"""
-    for query_line in query_date:  #遍历外层列表
-        date_chioce = []
-        for select_date_row in select_date:  #遍历内层的列表的序列号
-            date_index = culum_list.index(select_date_row)
-            date_chioce.append(query_line[date_index])
-        date_chioces.append(date_chioce)
-    print(date_chioces)
+
+    if  '*'in select_date:
+        date_chioces = query_date
+
+    else:
+        date_chioces = []
+        """从query_date中选择name,age的list[['25', 'Jim'], ['29', 'Tom'], ['40', 'Suzen'], ['32', 'Mark']]"""
+        for query_line in query_date:  #遍历外层列表
+            date_chioce = []
+            for select_date_row in select_date:  #遍历内层的列表的序列号
+                date_index = culum_list.index(select_date_row)
+                date_chioce.append(query_line[date_index])
+            date_chioces.append(date_chioce)
+    for i in date_chioces:
+        print(i)
 def main():
     """
     主函数，主逻辑流程
@@ -152,11 +158,23 @@ def main():
         if not cmd: continue
         else:
             if cmd.split(' ')[0] in route_operation:
-                query_left, query_right = cmd.split('where')
-                query_data = condition_screening(query_right)
-                b = cmd.split(' ')
-                route_operation[b[0]](query_left.strip(), query_data)
+                if 'where' in cmd:
+                    query_left, query_right = cmd.split('where')
+                    query_data = condition_screening(query_right)
+                else:
+                    query_data = []
+                    for index, val in enumerate(culumes_dict['id']):  # 将键值对格式转换成嵌套列表
+                        row_list = []
+                        for row in culumes_dict:
+                            row_list.append(culumes_dict[row][index])
+                        query_data.append(row_list)
 
+                    query_left = cmd.strip()
+                b = cmd.split(' ')
+                if cmd.split()[0] == 'add':
+                    add_message(query_left.strip())
+                else:
+                    route_operation[b[0]](query_left.strip(), query_data)
             else:
                 print('你输入的数据有问题')
 if __name__ == '__main__':
